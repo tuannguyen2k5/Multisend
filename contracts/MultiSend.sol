@@ -1,4 +1,5 @@
 pragma solidity >=0.7.0 <0.9.0;
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MultiSend {
     // to save the owner of the contract in construction
@@ -74,6 +75,15 @@ contract MultiSend {
         for (uint i = 0; i < addresses.length; i++) {
             // send the specified amount to the recipient
             transferOne(addresses[i], amounts[i]);
+        }
+    }
+    function multisendToken(IERC20 token, address[] memory recipients, uint256[] memory amounts) public payable{
+         require(recipients.length == amounts.length, "Invalid input lengths");
+        // require(approvedTokens[address(token)], "Token not approved");
+        require(token.allowance(owner, address(this)) >= totalAmount(amounts), "Insufficient allowance");
+
+        for (uint256 i = 0; i < recipients.length; i++) {
+            require(token.transferFrom(owner, recipients[i], amounts[i]), "Transfer failed");
         }
     }
 }
